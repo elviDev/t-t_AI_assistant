@@ -151,19 +151,24 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     position: _slideAnimation,
                     child: Column(
                       children: [
-                        _buildButton(
+                        _buildGradientButton(
                           'Sign In',
                           () => _navigateToSignIn(context),
-                          isPrimary: false,
+                          gradient: null,
                           isDark: isDark,
+                          borderOnly: true,
                         ),
                         const SizedBox(height: 16),
-                        _buildButton(
-                          'Sign In with Google',
-                          () => _signInWithGoogle(context),
-                          isPrimary: true,
+                        _buildGradientButton(
+                          'Sign Up with Google',
+                          () => _signUpWithGoogle(context),
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF3933C6), Color(0xFFA05FFF)],
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                          ),
                           isDark: isDark,
-                          icon: Icons.g_mobiledata,
+                          imageAsset: 'assets/google_logo.png',
                         ),
                         const SizedBox(height: 24),
                         GestureDetector(
@@ -192,50 +197,48 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     );
   }
 
-  Widget _buildButton(
+  Widget _buildGradientButton(
     String text,
     VoidCallback onPressed, {
-    required bool isPrimary,
+    required Gradient? gradient,
     required bool isDark,
-    IconData? icon,
+    bool borderOnly = false,
+    String? imageAsset,
   }) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      width: double.infinity,
-      height: 56,
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: isPrimary
-              ? AppColors.primary
-              : (isDark ? AppColors.darkSurface : AppColors.lightSurface),
-          foregroundColor: isPrimary
-              ? Colors.white
-              : (isDark ? AppColors.darkText : AppColors.lightText),
-          elevation: isPrimary ? 8 : 0,
-          shadowColor: isPrimary ? AppColors.primary.withOpacity(0.3) : null,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-            side: !isPrimary
-                ? BorderSide(
-                    color: isDark
-                        ? AppColors.darkTextSecondary.withOpacity(0.3)
-                        : AppColors.lightTextSecondary.withOpacity(0.3),
-                    width: 1,
-                  )
-                : BorderSide.none,
-          ),
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        width: double.infinity,
+        height: 56,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(28),
+          gradient: gradient,
+          color: gradient == null ? (isDark ? AppColors.darkSurface : AppColors.lightSurface) : null,
+          border: borderOnly
+              ? Border.all(
+                  color: isDark ? Colors.white54 : Colors.deepPurple,
+                  width: 1.5,
+                )
+              : null,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (icon != null) ...[
-              Icon(icon, size: 20),
-              const SizedBox(width: 8),
+            if (imageAsset != null) ...[
+              Image.asset(
+                imageAsset,
+                width: 24,
+                height: 24,
+              ),
+              const SizedBox(width: 12),
             ],
             Text(
               text,
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                color: gradient != null ? Colors.white : (isDark ? Colors.white : Colors.deepPurple),
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ],
         ),
@@ -279,7 +282,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     );
   }
 
-  void _signInWithGoogle(BuildContext context) {
+  void _signUpWithGoogle(BuildContext context) {
     _showLoadingAndNavigate(context);
   }
 
