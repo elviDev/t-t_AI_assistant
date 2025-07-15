@@ -7,6 +7,7 @@ import '../../shared/utils/navigation_utils.dart';
 import '../auth/sign_in_screen.dart';
 import '../auth/sign_up_screen.dart';
 import '../home/home_screen.dart';
+import '../../shared/widgets/app_logo.dart';
 
 /// Welcome screen that introduces the app and provides authentication options
 class WelcomeScreen extends StatefulWidget {
@@ -95,26 +96,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     return Column(
       children: [
         // AI Icon
-        Container(
-          width: AppConstants.avatarSize,
-          height: AppConstants.avatarSize,
-          decoration: const BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: AppColors.primaryGradient,
-            boxShadow: [
-              BoxShadow(
-                color: Color.fromRGBO(99, 102, 241, 0.3),
-                blurRadius: 20,
-                offset: Offset(0, 10),
-              ),
-            ],
-          ),
-          child: const Icon(
-            Icons.auto_awesome,
-            size: AppConstants.largeIconSize,
-            color: Colors.white,
-          ),
-        ),
+        const AppLogo(size: AppConstants.avatarSize),
         
         const SizedBox(height: AppConstants.spacing24),
         
@@ -188,7 +170,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           CustomButton(
             text: 'Sign In',
             onPressed: () => _navigateToSignIn(context),
-            isPrimary: true,
+            isPrimary: false,
             isDark: isDark,
           ),
           
@@ -198,9 +180,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           CustomButton(
             text: 'Sign In with Google',
             onPressed: () => _signInWithGoogle(context),
-            isPrimary: false,
+            isPrimary: true,
             isDark: isDark,
-            icon: Icons.g_mobiledata,
+            svgAsset: 'assets/google_logo.svg',
           ),
           
           const SizedBox(height: AppConstants.spacing24),

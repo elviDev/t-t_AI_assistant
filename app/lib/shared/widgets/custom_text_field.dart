@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_constants.dart';
+import '../../core/utils/gradient_utils.dart';
 
 /// Reusable custom text field widget with consistent styling
 class CustomTextField extends StatelessWidget {
@@ -20,6 +21,7 @@ class CustomTextField extends StatelessWidget {
   final void Function()? onTap;
   final bool readOnly;
   final bool isDark;
+  final bool useGradientBorder;
 
   const CustomTextField({
     super.key,
@@ -39,6 +41,7 @@ class CustomTextField extends StatelessWidget {
     this.onChanged,
     this.onTap,
     this.readOnly = false,
+    this.useGradientBorder = false,
   });
 
   @override
@@ -59,7 +62,18 @@ class CustomTextField extends StatelessWidget {
         const SizedBox(height: AppConstants.spacing8),
         
         // Text Field
-        TextFormField(
+        useGradientBorder
+            ? GradientUtils.gradientBorder(
+                borderRadius: AppConstants.borderRadius,
+                child: _buildTextField(),
+              )
+            : _buildTextField(),
+      ],
+    );
+  }
+
+  Widget _buildTextField() {
+    return TextFormField(
           controller: controller,
           keyboardType: keyboardType,
           obscureText: obscureText,
@@ -127,8 +141,6 @@ class CustomTextField extends StatelessWidget {
             ),
             counterText: '', // Hide character counter
           ),
-        ),
-      ],
-    );
+        );
   }
 }

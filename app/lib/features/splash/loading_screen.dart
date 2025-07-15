@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_constants.dart';
 import '../../shared/utils/navigation_utils.dart';
+import '../../shared/widgets/app_logo.dart';
 import '../welcome/welcome_screen.dart';
 
 /// Loading screen displayed during app initialization
@@ -99,11 +100,7 @@ class _LoadingScreenState extends State<LoadingScreen>
                             ),
                           ],
                         ),
-                        child: const Icon(
-                          Icons.psychology,
-                          size: AppConstants.largeIconSize,
-                          color: Colors.white,
-                        ),
+                        child: const AppLogo(size: AppConstants.avatarSize),
                       ),
                       
                       const SizedBox(height: AppConstants.spacing32),

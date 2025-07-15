@@ -57,7 +57,7 @@ class _SignInScreenState extends State<SignInScreen>
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
     return PopScope(
-      canPop: false, // Prevent back navigation
+      canPop: true,
       child: Scaffold(
         body: CurvedBackground(
           isDark: isDark,
@@ -105,6 +105,7 @@ class _SignInScreenState extends State<SignInScreen>
             validator: ValidationUtils.validateEmail,
             isDark: isDark,
             textInputAction: TextInputAction.next,
+            useGradientBorder: true,
           ),
           
           const SizedBox(height: AppConstants.spacing24),
@@ -118,6 +119,7 @@ class _SignInScreenState extends State<SignInScreen>
             validator: ValidationUtils.validatePassword,
             isDark: isDark,
             textInputAction: TextInputAction.done,
+            useGradientBorder: true,
             suffixIcon: IconButton(
               icon: Icon(
                 _obscurePassword ? Icons.visibility_off : Icons.visibility,

@@ -11,19 +11,25 @@ class AppConstants {
 
   // Animation Durations
   static const Duration splashDuration = Duration(milliseconds: 1500); // Reduced for better UX
+  static const Duration animationDuration = Duration(milliseconds: 300); // Added missing constant
   static const Duration shortAnimationDuration = Duration(milliseconds: 200);
   static const Duration mediumAnimationDuration = Duration(milliseconds: 600);
   static const Duration longAnimationDuration = Duration(milliseconds: 800);
   static const Duration pulseAnimationDuration = Duration(seconds: 2);
 
   // UI Constants
-  static const double borderRadius = 16.0;
+  static const double borderRadius = 50.0;
+  static const double cardBorderRadius = 16.0;
   static const double largeBorderRadius = 24.0;
   static const double smallBorderRadius = 8.0;
 
   // Spacing
+  static const double spacing4 = 4.0;
+  static const double spacing6 = 6.0;
   static const double spacing8 = 8.0;
+  static const double spacing12 = 12.0; // Added missing constant
   static const double spacing16 = 16.0;
+  static const double spacing20 = 20.0; // Added missing constant
   static const double spacing24 = 24.0;
   static const double spacing32 = 32.0;
   static const double spacing40 = 40.0;

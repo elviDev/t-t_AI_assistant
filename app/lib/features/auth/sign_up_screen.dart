@@ -62,7 +62,7 @@ class _SignUpScreenState extends State<SignUpScreen>
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
     return PopScope(
-      canPop: false, // Prevent back navigation
+      canPop: true,
       child: Scaffold(
         body: CurvedBackground(
           isDark: isDark,
@@ -112,6 +112,7 @@ class _SignUpScreenState extends State<SignUpScreen>
             validator: ValidationUtils.validateFullName,
             isDark: isDark,
             textInputAction: TextInputAction.next,
+            useGradientBorder: true,
           ),
           
           const SizedBox(height: AppConstants.spacing24),
@@ -125,6 +126,7 @@ class _SignUpScreenState extends State<SignUpScreen>
             validator: ValidationUtils.validateEmail,
             isDark: isDark,
             textInputAction: TextInputAction.next,
+            useGradientBorder: true,
           ),
           
           const SizedBox(height: AppConstants.spacing24),
@@ -138,6 +140,7 @@ class _SignUpScreenState extends State<SignUpScreen>
             validator: ValidationUtils.validatePassword,
             isDark: isDark,
             textInputAction: TextInputAction.next,
+            useGradientBorder: true,
             suffixIcon: IconButton(
               icon: Icon(
                 _obscurePassword ? Icons.visibility_off : Icons.visibility,
@@ -165,6 +168,7 @@ class _SignUpScreenState extends State<SignUpScreen>
             ),
             isDark: isDark,
             textInputAction: TextInputAction.done,
+            useGradientBorder: true,
             suffixIcon: IconButton(
               icon: Icon(
                 _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,

@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'core/theme/app_theme.dart';
 import 'core/constants/app_constants.dart';
 import 'features/splash/loading_screen.dart';
+import 'providers/voice_provider_mock.dart' as voice_mock;
+import 'providers/channel_provider.dart';
+import 'providers/task_provider.dart';
 
 /// Main entry point of the application
 void main() {
@@ -34,28 +38,35 @@ class AIAssistantApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      // App configuration
-      title: AppConstants.appName,
-      debugShowCheckedModeBanner: false,
-      
-      // Theme configuration
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
-      
-      // Initial screen
-      home: const LoadingScreen(),
-      
-      // Error handling and responsive design
-      builder: (context, child) {
-        return MediaQuery(
-          data: MediaQuery.of(context).copyWith(
-            textScaler: const TextScaler.linear(1.0), // Prevent text scaling issues
-          ),
-          child: child!,
-        );
-      },
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => voice_mock.VoiceProvider()),
+        ChangeNotifierProvider(create: (_) => ChannelProvider()),
+        ChangeNotifierProvider(create: (_) => TaskProvider()..initializeSampleTasks()),
+      ],
+      child: MaterialApp(
+        // App configuration
+        title: AppConstants.appName,
+        debugShowCheckedModeBanner: false,
+        
+        // Theme configuration
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: ThemeMode.system,
+        
+        // Initial screen
+        home: const LoadingScreen(),
+        
+        // Error handling and responsive design
+        builder: (context, child) {
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              textScaler: const TextScaler.linear(1.0), // Prevent text scaling issues
+            ),
+            child: child!,
+          );
+        },
+      ),
     );
   }
 }
