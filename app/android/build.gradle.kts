@@ -1,7 +1,19 @@
 allprojects {
     repositories {
+<<<<<<< HEAD
         google()
         mavenCentral()
+=======
+        google {
+            content {
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
+            }
+        }
+        mavenCentral()
+        gradlePluginPortal()
+>>>>>>> 07003bf (updated the conversation, and burder radius to some cards)
     }
 }
 
@@ -12,6 +24,10 @@ subprojects {
     val newSubprojectBuildDir: Directory = newBuildDir.dir(project.name)
     project.layout.buildDirectory.value(newSubprojectBuildDir)
 }
+<<<<<<< HEAD
+=======
+
+>>>>>>> 07003bf (updated the conversation, and burder radius to some cards)
 subprojects {
     project.evaluationDependsOn(":app")
 }
