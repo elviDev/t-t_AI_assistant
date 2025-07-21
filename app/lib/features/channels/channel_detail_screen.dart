@@ -3,10 +3,10 @@ import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_constants.dart';
 import '../../models/channel.dart';
 import '../../models/message.dart';
-import '../../shared/widgets/voice_prompt_widget.dart';
-import 'widgets/message_bubble.dart';
-import 'widgets/channel_header.dart';
-import 'widgets/message_input.dart';
+import '../../models/user.dart';
+import 'widgets/enhanced_message_bubble.dart';
+import 'widgets/enhanced_message_input.dart';
+import 'widgets/channel_templates.dart';
 
 /// Channel detail screen for messaging and collaboration
 class ChannelDetailScreen extends StatefulWidget {
@@ -29,8 +29,8 @@ class _ChannelDetailScreenState extends State<ChannelDetailScreen>
   late Animation<double> _fadeAnimation;
   
   List<Message> _messages = [];
+  List<User> _channelMembers = [];
   bool _isLoading = false;
-  bool _isVoiceRecording = false;
 
   @override
   void initState() {
@@ -60,15 +60,15 @@ class _ChannelDetailScreenState extends State<ChannelDetailScreen>
     
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBackground : AppColors.lightBackground,
-      appBar: _buildAppBar(isDark),
       body: FadeTransition(
         opacity: _fadeAnimation,
         child: Column(
           children: [
-            // Channel header with info
-            ChannelHeader(
+            // Enhanced channel header with theme and back button
+            EnhancedChannelHeader(
               channel: widget.channel,
               isDark: isDark,
+              onBackPressed: () => Navigator.of(context).pop(),
             ),
             
             // Messages list
@@ -76,23 +76,16 @@ class _ChannelDetailScreenState extends State<ChannelDetailScreen>
               child: _buildMessagesList(isDark),
             ),
             
-            // Voice prompt for AI assistance
-            Container(
-              padding: const EdgeInsets.all(AppConstants.spacing16),
-              child: VoicePromptWidget(
-                onPromptSubmitted: _handleAIPrompt,
-                onVoicePressed: _toggleVoiceRecording,
-                isListening: _isVoiceRecording,
-              ),
-            ),
-            
-            // Message input
-            MessageInput(
+            // Enhanced message input with mentions and AI handling
+            EnhancedMessageInput(
               controller: _messageController,
               isDark: isDark,
               onSendMessage: _sendMessage,
+              onSendAIPrompt: _handleAIPrompt,
               onAttachFile: _attachFile,
               onSendVoiceMessage: _sendVoiceMessage,
+              channelMembers: _channelMembers,
+              placeholder: ChannelTemplates.getPlaceholderText(widget.channel.category),
             ),
           ],
         ),
@@ -100,83 +93,7 @@ class _ChannelDetailScreenState extends State<ChannelDetailScreen>
     );
   }
 
-  /// Build app bar
-  PreferredSizeWidget _buildAppBar(bool isDark) {
-    return AppBar(
-      backgroundColor: isDark ? AppColors.darkSurface : AppColors.lightSurface,
-      elevation: 0,
-      leading: IconButton(
-        icon: Icon(
-          Icons.arrow_back_ios_rounded,
-          color: isDark ? AppColors.darkText : AppColors.lightText,
-        ),
-        onPressed: () => Navigator.of(context).pop(),
-      ),
-      title: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            widget.channel.name,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: isDark ? AppColors.darkText : AppColors.lightText,
-              fontFamily: AppConstants.fontFamily,
-            ),
-          ),
-          Text(
-            '${widget.channel.memberIds.length} members',
-            style: TextStyle(
-              fontSize: 12,
-              color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
-              fontFamily: AppConstants.fontFamily,
-            ),
-          ),
-        ],
-      ),
-      actions: [
-        IconButton(
-          icon: Icon(
-            Icons.video_call_rounded,
-            color: isDark ? AppColors.darkText : AppColors.lightText,
-          ),
-          onPressed: _startVideoCall,
-        ),
-        IconButton(
-          icon: Icon(
-            Icons.call_rounded,
-            color: isDark ? AppColors.darkText : AppColors.lightText,
-          ),
-          onPressed: _startAudioCall,
-        ),
-        PopupMenuButton<String>(
-          icon: Icon(
-            Icons.more_vert,
-            color: isDark ? AppColors.darkText : AppColors.lightText,
-          ),
-          onSelected: _handleMenuAction,
-          itemBuilder: (context) => [
-            const PopupMenuItem(
-              value: 'members',
-              child: Text('View Members'),
-            ),
-            const PopupMenuItem(
-              value: 'files',
-              child: Text('Files & Media'),
-            ),
-            const PopupMenuItem(
-              value: 'settings',
-              child: Text('Channel Settings'),
-            ),
-            const PopupMenuItem(
-              value: 'leave',
-              child: Text('Leave Channel'),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
+
 
   /// Build messages list
   Widget _buildMessagesList(bool isDark) {
@@ -229,7 +146,7 @@ class _ChannelDetailScreenState extends State<ChannelDetailScreen>
         final message = _messages[index];
         final isMe = message.senderId == 'current_user'; // Mock current user
         
-        return MessageBubble(
+        return EnhancedMessageBubble(
           message: message,
           isMe: isMe,
           isDark: isDark,
@@ -237,46 +154,69 @@ class _ChannelDetailScreenState extends State<ChannelDetailScreen>
           onReply: () => _replyToMessage(message),
           onEdit: isMe ? () => _editMessage(message) : null,
           onDelete: isMe ? () => _deleteMessage(message.id) : null,
+          onMentionTap: _handleMentionTap,
+          channelMembers: _channelMembers,
+          channelCategory: widget.channel.category,
         );
       },
     );
   }
 
-  /// Initialize sample messages
+  /// Initialize sample messages and channel members
   void _initializeMessages() {
     setState(() {
       _isLoading = true;
     });
 
+    // Initialize channel members
+    _channelMembers = [
+      User(
+        id: 'user1',
+        name: 'Carlos Morales',
+        email: 'carlos@example.com',
+        avatar: '',
+        title: 'Frontend Developer',
+        isOnline: true,
+      ),
+      User(
+        id: 'user2',
+        name: 'Ana Rodriguez',
+        email: 'ana@example.com',
+        avatar: '',
+        title: 'UX Designer',
+        isOnline: true,
+      ),
+      User(
+        id: 'user3',
+        name: 'Pedro Sánchez',
+        email: 'pedro@example.com',
+        avatar: '',
+        title: 'Marketing Manager',
+        isOnline: false,
+      ),
+      User(
+        id: 'user4',
+        name: 'María González',
+        email: 'maria@example.com',
+        avatar: '',
+        title: 'Project Manager',
+        isOnline: true,
+      ),
+      User(
+        id: 'user5',
+        name: 'Laura Jiménez',
+        email: 'laura@example.com',
+        avatar: '',
+        title: 'HR Manager',
+        isOnline: false,
+      ),
+    ];
+
     // Simulate loading messages
     Future.delayed(const Duration(seconds: 1), () {
       setState(() {
-        _messages = [
-          Message(
-            id: '1',
-            senderId: 'user1',
-            senderName: 'Alice Johnson',
-            content: 'Hey everyone! Welcome to the ${widget.channel.name} channel. Let\'s brainstorm some ideas for our upcoming project.',
-            timestamp: DateTime.now().subtract(const Duration(hours: 2)),
-            type: MessageType.text,
-          ),
-          Message(
-            id: '2',
-            senderId: 'current_user',
-            senderName: 'You',
-            content: 'Great! I have some initial thoughts about the user interface design. Should we start with wireframes?',
-            timestamp: DateTime.now().subtract(const Duration(hours: 1, minutes: 45)),
-            type: MessageType.text,
-          ),
-          Message(
-            id: '3',
-            senderId: 'user2',
-            senderName: 'Bob Smith',
-            content: 'That sounds like a good plan. I can work on the technical architecture while you handle the UI design.',
-            timestamp: DateTime.now().subtract(const Duration(hours: 1, minutes: 30)),
-            type: MessageType.text,
-          ),
-        ];
+        // Use template messages based on channel category
+        _messages = ChannelTemplates.getTemplateMessages(widget.channel.category);
         _isLoading = false;
       });
     });
@@ -397,68 +337,187 @@ class _ChannelDetailScreenState extends State<ChannelDetailScreen>
     required VoidCallback onTap,
     required bool isDark,
   }) {
-    return GestureDetector(
+    return InkWell(
       onTap: onTap,
-      child: Column(
-        children: [
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              gradient: AppColors.primaryGradient,
-              borderRadius: BorderRadius.circular(AppConstants.spacing16),
-            ),
-            child: Icon(
+      borderRadius: BorderRadius.circular(AppConstants.spacing12),
+      child: Container(
+        padding: const EdgeInsets.all(AppConstants.spacing16),
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.darkBackground : AppColors.lightBackground,
+          borderRadius: BorderRadius.circular(AppConstants.spacing12),
+        ),
+        child: Column(
+          children: [
+            Icon(
               icon,
-              color: Colors.white,
-              size: 30,
-            ),
-          ),
-          const SizedBox(height: AppConstants.spacing8),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
+              size: 32,
               color: isDark ? AppColors.darkText : AppColors.lightText,
-              fontFamily: AppConstants.fontFamily,
             ),
-          ),
-        ],
+            const SizedBox(height: AppConstants.spacing8),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                color: isDark ? AppColors.darkText : AppColors.lightText,
+                fontFamily: AppConstants.fontFamily,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  /// Handle AI prompt
+  /// Handle AI prompt submission
   void _handleAIPrompt(String prompt) {
-    // Simulate AI processing
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('AI is processing: "$prompt"'),
-        backgroundColor: AppColors.primaryColor,
-      ),
+    // Generate AI response and add to messages
+    final aiResponse = _generateAIResponse(prompt);
+    
+    final aiMessage = Message(
+      id: 'ai_${DateTime.now().millisecondsSinceEpoch}',
+      senderId: 'ai_assistant',
+      senderName: 'AI Assistant',
+      content: aiResponse,
+      timestamp: DateTime.now(),
+      type: MessageType.text,
     );
-  }
-
-  /// Toggle voice recording
-  void _toggleVoiceRecording() {
+    
     setState(() {
-      _isVoiceRecording = !_isVoiceRecording;
+      _messages.add(aiMessage);
     });
     
-    if (_isVoiceRecording) {
-      // Start voice recording
-      Future.delayed(const Duration(seconds: 3), () {
-        if (mounted && _isVoiceRecording) {
-          _toggleVoiceRecording();
-          _handleAIPrompt('Create a task for mobile app development');
-        }
-      });
+    _scrollToBottom();
+  }
+
+  /// Generate AI response based on prompt and channel context
+  String _generateAIResponse(String prompt) {
+    final category = widget.channel.category.toLowerCase();
+    
+    // Context-aware responses based on channel category
+    switch (category) {
+      case 'development':
+        return _getDevAIResponse(prompt);
+      case 'marketing':
+        return _getMarketingAIResponse(prompt);
+      case 'events':
+        return _getEventsAIResponse(prompt);
+      case 'finance':
+        return _getFinanceAIResponse(prompt);
+      default:
+        return _getGeneralAIResponse(prompt);
     }
   }
 
-  /// React to message
+  /// Development-specific AI responses
+  String _getDevAIResponse(String prompt) {
+    final responses = [
+      '🚀 Para "$prompt", te sugiero revisar nuestra arquitectura actual y considerar implementar un patrón de design apropiado.',
+      '💻 Basándome en "$prompt", recomiendo hacer code review del módulo relacionado y verificar las pruebas unitarias.',
+      '⚡ Sobre "$prompt": podríamos optimizar el performance implementando lazy loading o memoization.',
+      '🔧 Para resolver "$prompt", te ayudo con algunos snippets de código y mejores prácticas.',
+      '📱 Considerando "$prompt", asegurémonos de que sea responsive y siga las guías de Material Design.',
+    ];
+    return responses[prompt.hashCode % responses.length];
+  }
+
+  /// Marketing-specific AI responses
+  String _getMarketingAIResponse(String prompt) {
+    final responses = [
+      '📊 Respecto a "$prompt", analicemos las métricas actuales y definamos KPIs específicos para medir el éxito.',
+      '🎯 Para "$prompt", sugiero segmentar la audiencia y crear contenido personalizado para cada grupo.',
+      '📈 Sobre "$prompt": podríamos implementar A/B testing para optimizar la conversión.',
+      '🎨 Considerando "$prompt", necesitamos crear creatividades que resuenen con nuestra brand voice.',
+      '💡 Para "$prompt", analicemos la competencia y identifiquemos oportunidades de diferenciación.',
+    ];
+    return responses[prompt.hashCode % responses.length];
+  }
+
+  /// Events-specific AI responses
+  String _getEventsAIResponse(String prompt) {
+    final responses = [
+      '🎉 Para "$prompt", coordinemos el calendario del equipo y definamos la logística necesaria.',
+      '🌟 Sobre "$prompt": creemos una experiencia memorable que fortalezca los vínculos del equipo.',
+      '🎪 Considerando "$prompt", podríamos organizar actividades que fomenten la colaboración y creatividad.',
+      '🍕 Para "$prompt", planifiquemos la comida, el lugar y las actividades de forma inclusiva.',
+      '📅 Respecto a "$prompt", asegurémonos de tener un plan B y comunicar todos los detalles al equipo.',
+    ];
+    return responses[prompt.hashCode % responses.length];
+  }
+
+  /// Finance-specific AI responses
+  String _getFinanceAIResponse(String prompt) {
+    final responses = [
+      '💰 Sobre "$prompt", revisemos el presupuesto actual y analicemos el ROI de nuestras inversiones.',
+      '📊 Para "$prompt", necesitamos datos más granulares para tomar decisiones financieras informadas.',
+      '💎 Considerando "$prompt", evaluemos el costo-beneficio y el impacto en nuestros márgenes.',
+      '📈 Respecto a "$prompt", analicemos las tendencias y proyecciones para el próximo trimestre.',
+      '🎯 Para "$prompt", definamos métricas financieras claras y estabelezcan metas alcanzables.',
+    ];
+    return responses[prompt.hashCode % responses.length];
+  }
+
+  /// General AI responses
+  String _getGeneralAIResponse(String prompt) {
+    final responses = [
+      '🤖 Entiendo tu consulta sobre "$prompt". Te ayudo a encontrar la mejor solución.',
+      '💡 Basándome en "$prompt", aquí tienes algunas sugerencias y próximos pasos.',
+      '🎯 Para resolver "$prompt", recomiendo coordinar con el equipo y revisar los recursos disponibles.',
+      '📋 Sobre "$prompt": creemos un plan de acción con objetivos claros y timelines definidos.',
+      '✨ Considerando "$prompt", exploremos diferentes enfoques y elijamos el más eficiente.',
+    ];
+    return responses[prompt.hashCode % responses.length];
+  }
+
+
+
+  /// React to message with enhanced logic
   void _reactToMessage(String messageId, String reaction) {
-    // Implementation for message reactions
+    setState(() {
+      final messageIndex = _messages.indexWhere((m) => m.id == messageId);
+      if (messageIndex != -1) {
+        final message = _messages[messageIndex];
+        final reactions = List<MessageReaction>.from(message.reactions);
+        
+        // Find existing reaction
+        final existingReactionIndex = reactions.indexWhere((r) => r.emoji == reaction);
+        
+        if (existingReactionIndex != -1) {
+          // Reaction exists, toggle user's reaction
+          final existingReaction = reactions[existingReactionIndex];
+          final userIds = List<String>.from(existingReaction.userIds);
+          
+          if (userIds.contains('current_user')) {
+            // Remove user's reaction
+            userIds.remove('current_user');
+            if (userIds.isEmpty) {
+              // Remove reaction completely if no users left
+              reactions.removeAt(existingReactionIndex);
+            } else {
+              reactions[existingReactionIndex] = MessageReaction(
+                emoji: reaction,
+                userIds: userIds,
+              );
+            }
+          } else {
+            // Add user's reaction
+            userIds.add('current_user');
+            reactions[existingReactionIndex] = MessageReaction(
+              emoji: reaction,
+              userIds: userIds,
+            );
+          }
+        } else {
+          // New reaction
+          reactions.add(MessageReaction(
+            emoji: reaction,
+            userIds: ['current_user'],
+          ));
+        }
+        
+        // Update message with new reactions
+        _messages[messageIndex] = message.copyWith(reactions: reactions);
+      }
+    });
   }
 
   /// Reply to message
@@ -478,36 +537,16 @@ class _ChannelDetailScreenState extends State<ChannelDetailScreen>
     });
   }
 
-  /// Start video call
-  void _startVideoCall() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Video call feature coming soon!')),
-    );
-  }
 
-  /// Start audio call
-  void _startAudioCall() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Audio call feature coming soon!')),
-    );
-  }
 
-  /// Handle menu actions
-  void _handleMenuAction(String action) {
-    switch (action) {
-      case 'members':
-        // Show members
-        break;
-      case 'files':
-        // Show files and media
-        break;
-      case 'settings':
-        // Show channel settings
-        break;
-      case 'leave':
-        // Leave channel
-        break;
-    }
+  /// Handle mention tap
+  void _handleMentionTap(String username) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Perfil de $username'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 
   /// Scroll to bottom of messages
