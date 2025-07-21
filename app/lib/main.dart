@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'core/theme/app_theme.dart';
 import 'core/constants/app_constants.dart';
 import 'features/splash/loading_screen.dart';
-import 'providers/voice_provider_mock.dart' as voice_mock;
+import 'providers/voice_provider.dart';
 import 'providers/channel_provider.dart';
 import 'providers/task_provider.dart';
 
@@ -40,7 +40,7 @@ class AIAssistantApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => voice_mock.VoiceProvider()),
+        ChangeNotifierProvider(create: (_) => VoiceProvider()),
         ChangeNotifierProvider(create: (_) => ChannelProvider()),
         ChangeNotifierProvider(create: (_) => TaskProvider()..initializeSampleTasks()),
       ],
